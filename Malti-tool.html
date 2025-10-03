@@ -1,0 +1,2317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi Tool Hub</title>
+    <style>
+        :root {
+            --bg-color: #1E1E2F;
+            --text-color: #EAEAEA;
+            --header-bg: #2B2D42;
+            --accent-color: #FFD700;
+            --card-bg: #3A3D5B;
+            --hover-bg: #FFD700;
+            --hover-text: #1E1E2F;
+            --button-hover: #E6C200;
+            --shadow: rgba(255, 215, 0, 0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        header {
+            background-color: var(--header-bg);
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            color: var(--accent-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.8;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+        }
+
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+        }
+
+        .tool-card {
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .tool-card:hover {
+            background-color: var(--hover-bg);
+            color: var(--hover-text);
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px var(--shadow);
+        }
+
+        .tool-card h2 {
+            font-size: 1.4rem;
+            margin-bottom: 0.8rem;
+            color: var(--accent-color);
+        }
+
+        .tool-card:hover h2 {
+            color: var(--hover-text);
+        }
+
+        .tool-card p {
+            margin-bottom: 1.2rem;
+            flex-grow: 1;
+        }
+
+        .tool-card button {
+            background-color: var(--accent-color);
+            color: var(--bg-color);
+            border: none;
+            padding: 0.8rem 1.2rem;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            align-self: flex-start;
+        }
+
+        .tool-card button:hover {
+            background-color: var(--button-hover);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .modal-content {
+            background-color: var(--card-bg);
+            margin: 2rem auto;
+            padding: 2rem;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 800px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1.5rem;
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: var(--text-color);
+            transition: color 0.3s ease;
+        }
+
+        .close-btn:hover {
+            color: var(--accent-color);
+        }
+
+        .modal-title {
+            color: var(--accent-color);
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+        }
+
+        /* Tool-specific styles */
+        .tool-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .tool-section h3 {
+            margin-bottom: 0.8rem;
+            color: var(--accent-color);
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 0.8rem;
+            margin-bottom: 1rem;
+            border-radius: 5px;
+            border: 1px solid #555;
+            background-color: #2a2a3a;
+            color: var(--text-color);
+        }
+
+        button {
+            background-color: var(--accent-color);
+            color: var(--bg-color);
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        button:hover {
+            background-color: var(--button-hover);
+        }
+
+        .result {
+            background-color: #2a2a3a;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-top: 1rem;
+            word-break: break-all;
+        }
+
+        canvas {
+            max-width: 100%;
+            margin: 1rem 0;
+            border: 1px solid #555;
+            border-radius: 5px;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-input-wrapper input[type=file] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .file-input-label {
+            display: block;
+            padding: 0.8rem;
+            background-color: #2a2a3a;
+            border: 1px dashed #555;
+            border-radius: 5px;
+            text-align: center;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .file-input-label:hover {
+            background-color: #333344;
+        }
+
+        .flex-row {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .flex-row > * {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 992px) {
+            .tools-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .tools-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .modal-content {
+                padding: 1.5rem;
+                margin: 1rem auto;
+            }
+        }
+
+        /* Animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .tool-card, .modal-content {
+            animation: fadeIn 0.5s ease;
+        }
+
+        /* Scroll animations */
+        .tool-card {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+        .tool-card.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Multi Tool Hub</h1>
+        <p class="subtitle">Your all-in-one solution for everyday tools</p>
+    </header>
+
+    <div class="container">
+        <div class="tools-grid" id="toolsGrid">
+            <!-- Tool cards will be generated by JavaScript -->
+        </div>
+    </div>
+
+    <!-- Modal for tools -->
+    <div class="modal" id="toolModal">
+        <div class="modal-content">
+            <span class="close-btn" id="closeModal">&times;</span>
+            <h2 class="modal-title" id="modalTitle">Tool Title</h2>
+            <div id="modalContent">
+                <!-- Tool content will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tool data
+        const tools = [
+            {
+                id: 1,
+                title: "Image Converter",
+                description: "Convert between JPG, PNG, and WEBP formats",
+                icon: "🖼️"
+            },
+            {
+                id: 2,
+                title: "Image Compressor",
+                description: "Compress image file size with quality settings",
+                icon: "📁"
+            },
+            {
+                id: 3,
+                title: "Image Cropper",
+                description: "Upload and crop image with preview and export",
+                icon: "✂️"
+            },
+            {
+                id: 4,
+                title: "Video Converter",
+                description: "Convert video format (MP4 ↔ WebM)",
+                icon: "🎥"
+            },
+            {
+                id: 5,
+                title: "Audio Converter",
+                description: "Convert between MP3 and WAV formats",
+                icon: "🔊"
+            },
+            {
+                id: 6,
+                title: "Audio Trimmer",
+                description: "Upload, trim audio and export trimmed clip",
+                icon: "✂️"
+            },
+            {
+                id: 7,
+                title: "Age Calculator",
+                description: "Calculate age in years, months, and days",
+                icon: "📅"
+            },
+            {
+                id: 8,
+                title: "EMI Calculator",
+                description: "Calculate monthly EMI and total interest",
+                icon: "💰"
+            },
+            {
+                id: 9,
+                title: "SIP Calculator",
+                description: "Calculate future value of monthly investments",
+                icon: "📈"
+            },
+            {
+                id: 10,
+                title: "QR Code Generator",
+                description: "Generate downloadable QR codes from text or URLs",
+                icon: "🔲"
+            },
+            {
+                id: 11,
+                title: "Password Generator",
+                description: "Generate secure passwords with custom options",
+                icon: "🔒"
+            },
+            {
+                id: 12,
+                title: "Word Counter",
+                description: "Count words, characters, spaces, and reading time",
+                icon: "📝"
+            },
+            {
+                id: 13,
+                title: "Base64 Encoder/Decoder",
+                description: "Convert between plain text and base64",
+                icon: "🔤"
+            },
+            {
+                id: 14,
+                title: "Color Picker",
+                description: "Pick colors and get HEX, RGB, and HSL values",
+                icon: "🎨"
+            },
+            {
+                id: 15,
+                title: "Text to Speech",
+                description: "Convert written text to spoken audio",
+                icon: "🔊"
+            },
+            {
+                id: 16,
+                title: "Speech to Text",
+                description: "Convert voice into text using microphone",
+                icon: "🎤"
+            },
+            {
+                id: 17,
+                title: "JSON Formatter",
+                description: "Format and validate JSON with error handling",
+                icon: "{}"
+            },
+            {
+                id: 18,
+                title: "Unit Converter",
+                description: "Convert between different units of measurement",
+                icon: "📏"
+            },
+            {
+                id: 19,
+                title: "BMI Calculator",
+                description: "Calculate BMI and determine health category",
+                icon: "⚖️"
+            },
+            {
+                id: 20,
+                title: "Timer / Stopwatch",
+                description: "Simple timer and stopwatch functionality",
+                icon: "⏱️"
+            }
+        ];
+
+        // DOM Elements
+        const toolsGrid = document.getElementById('toolsGrid');
+        const toolModal = document.getElementById('toolModal');
+        const closeModal = document.getElementById('closeModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalContent = document.getElementById('modalContent');
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            renderToolCards();
+            setupEventListeners();
+            setupScrollAnimation();
+        });
+
+        // Render tool cards
+        function renderToolCards() {
+            toolsGrid.innerHTML = '';
+            
+            tools.forEach(tool => {
+                const card = document.createElement('div');
+                card.className = 'tool-card';
+                card.innerHTML = `
+                    <h2>${tool.icon} ${tool.title}</h2>
+                    <p>${tool.description}</p>
+                    <button data-tool-id="${tool.id}">Open Tool</button>
+                `;
+                toolsGrid.appendChild(card);
+            });
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Tool card buttons
+            toolsGrid.addEventListener('click', function(e) {
+                if (e.target.tagName === 'BUTTON') {
+                    const toolId = parseInt(e.target.getAttribute('data-tool-id'));
+                    openToolModal(toolId);
+                }
+            });
+
+            // Close modal
+            closeModal.addEventListener('click', closeToolModal);
+            
+            // Close modal when clicking outside
+            toolModal.addEventListener('click', function(e) {
+                if (e.target === toolModal) {
+                    closeToolModal();
+                }
+            });
+        }
+
+        // Scroll animation
+        function setupScrollAnimation() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            document.querySelectorAll('.tool-card').forEach(card => {
+                observer.observe(card);
+            });
+        }
+
+        // Open tool modal
+        function openToolModal(toolId) {
+            const tool = tools.find(t => t.id === toolId);
+            if (!tool) return;
+
+            modalTitle.textContent = `${tool.icon} ${tool.title}`;
+            modalContent.innerHTML = getToolContent(toolId);
+            
+            toolModal.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+            
+            // Initialize tool-specific functionality
+            initializeTool(toolId);
+        }
+
+        // Close tool modal
+        function closeToolModal() {
+            toolModal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+            
+            // Clean up any ongoing processes
+            cleanupToolProcesses();
+        }
+
+        // Get tool content based on ID
+        function getToolContent(toolId) {
+            switch(toolId) {
+                case 1: return getImageConverterContent();
+                case 2: return getImageCompressorContent();
+                case 3: return getImageCropperContent();
+                case 4: return getVideoConverterContent();
+                case 5: return getAudioConverterContent();
+                case 6: return getAudioTrimmerContent();
+                case 7: return getAgeCalculatorContent();
+                case 8: return getEMICalculatorContent();
+                case 9: return getSIPCalculatorContent();
+                case 10: return getQRCodeGeneratorContent();
+                case 11: return getPasswordGeneratorContent();
+                case 12: return getWordCounterContent();
+                case 13: return getBase64ConverterContent();
+                case 14: return getColorPickerContent();
+                case 15: return getTextToSpeechContent();
+                case 16: return getSpeechToTextContent();
+                case 17: return getJSONFormatterContent();
+                case 18: return getUnitConverterContent();
+                case 19: return getBMICalculatorContent();
+                case 20: return getTimerStopwatchContent();
+                default: return '<p>Tool content not available.</p>';
+            }
+        }
+
+        // Initialize tool-specific functionality
+        function initializeTool(toolId) {
+            switch(toolId) {
+                case 1: initImageConverter(); break;
+                case 2: initImageCompressor(); break;
+                case 3: initImageCropper(); break;
+                case 4: initVideoConverter(); break;
+                case 5: initAudioConverter(); break;
+                case 6: initAudioTrimmer(); break;
+                case 7: initAgeCalculator(); break;
+                case 8: initEMICalculator(); break;
+                case 9: initSIPCalculator(); break;
+                case 10: initQRCodeGenerator(); break;
+                case 11: initPasswordGenerator(); break;
+                case 12: initWordCounter(); break;
+                case 13: initBase64Converter(); break;
+                case 14: initColorPicker(); break;
+                case 15: initTextToSpeech(); break;
+                case 16: initSpeechToText(); break;
+                case 17: initJSONFormatter(); break;
+                case 18: initUnitConverter(); break;
+                case 19: initBMICalculator(); break;
+                case 20: initTimerStopwatch(); break;
+            }
+        }
+
+        // Clean up any ongoing processes
+        function cleanupToolProcesses() {
+            // Stop any ongoing speech synthesis
+            if (window.speechSynthesis) {
+                window.speechSynthesis.cancel();
+            }
+            
+            // Stop any ongoing speech recognition
+            if (window.SpeechRecognition || window.webkitSpeechRecognition) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                if (window.recognition) {
+                    window.recognition.stop();
+                }
+            }
+            
+            // Clear any intervals
+            if (window.timerInterval) {
+                clearInterval(window.timerInterval);
+                window.timerInterval = null;
+            }
+            
+            if (window.stopwatchInterval) {
+                clearInterval(window.stopwatchInterval);
+                window.stopwatchInterval = null;
+            }
+        }
+
+        // ========== TOOL IMPLEMENTATIONS ==========
+
+        // Tool 1: Image Converter
+        function getImageConverterContent() {
+            return `
+                <div class="tool-section">
+                    <h3>Convert Image Format</h3>
+                    <div class="file-input-wrapper">
+                        <input type="file" id="imageInput" accept="image/*">
+                        <label for="imageInput" class="file-input-label">Choose an image file</label>
+                    </div>
+                    <select id="formatSelect">
+                        <option value="jpg">JPG</option>
+                        <option value="png">PNG</option>
+                        <option value="webp">WEBP</option>
+                    </select>
+                    <button id="convertBtn">Convert Image</button>
+                    <canvas id="imageCanvas" style="display: none;"></canvas>
+                    <div id="conversionResult" class="result" style="display: none;"></div>
+                </div>
+            `;
+        }
+
+        function initImageConverter() {
+            const imageInput = document.getElementById('imageInput');
+            const formatSelect = document.getElementById('formatSelect');
+            const convertBtn = document.getElementById('convertBtn');
+            const canvas = document.getElementById('imageCanvas');
+            const ctx = canvas.getContext('2d');
+            const resultDiv = document.getElementById('conversionResult');
+
+            convertBtn.addEventListener('click', function() {
+                if (!imageInput.files.length) {
+                    alert('Please select an image file first.');
+                    return;
+                }
+
+                const file = imageInput.files[0];
+                const reader = new FileReader();
+
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.onload = function() {
+                        canvas.width = img.width;
+                        canvas.height = img.height;
+                        ctx.drawImage(img, 0, 0);
+
+                        const format = formatSelect.value;
+                        let mimeType;
+                        switch(format) {
+                            case 'jpg': mimeType = 'image/jpeg'; break;
+                            case 'png': mimeType = 'image/png'; break;
+                            case 'webp': mimeType = 'image/webp'; break;
+                        }
+
+                        const dataURL = canvas.toDataURL(mimeType);
+                        resultDiv.innerHTML = `
+                            <p>Converted to ${format.toUpperCase()}:</p>
+                            <img src="${dataURL}" style="max-width: 100%; margin: 10px 0;">
+                            <a href="${dataURL}" download="converted.${format}">Download Converted Image</a>
+                        `;
+                        resultDiv.style.display = 'block';
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // Tool 2: Image Compressor
+        function getImageCompressorContent() {
+            return `
+                <div class="tool-section">
+                    <h3>Compress Image</h3>
+                    <div class="file-input-wrapper">
+                        <input type="file" id="compressImageInput" accept="image/*">
+                        <label for="compressImageInput" class="file-input-label">Choose an image file</label>
+                    </div>
+                    <label for="qualitySlider">Quality: <span id="qualityValue">80</span>%</label>
+                    <input type="range" id="qualitySlider" min="1" max="100" value="80">
+                    <button id="compressBtn">Compress Image</button>
+                    <div id="compressionInfo" class="result" style="display: none;"></div>
+                    <div id="compressionResult" class="result" style="display: none;"></div>
+                </div>
+            `;
+        }
+
+        function initImageCompressor() {
+            const imageInput = document.getElementById('compressImageInput');
+            const qualitySlider = document.getElementById('qualitySlider');
+            const qualityValue = document.getElementById('qualityValue');
+            const compressBtn = document.getElementById('compressBtn');
+            const infoDiv = document.getElementById('compressionInfo');
+            const resultDiv = document.getElementById('compressionResult');
+
+            qualitySlider.addEventListener('input', function() {
+                qualityValue.textContent = this.value;
+            });
+
+            compressBtn.addEventListener('click', function() {
+                if (!imageInput.files.length) {
+                    alert('Please select an image file first.');
+                    return;
+                }
+
+                const file = imageInput.files[0];
+                const quality = qualitySlider.value / 100;
+                const reader = new FileReader();
+
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        canvas.width = img.width;
+                        canvas.height = img.height;
+                        ctx.drawImage(img, 0, 0);
+
+                        const originalSize = file.size;
+                        const dataURL = canvas.toDataURL('image/jpeg', quality);
+                        const compressedSize = Math.round((dataURL.length * 3) / 4); // Approximate size
+
+                        infoDiv.innerHTML = `
+                            <p>Original size: ${formatBytes(originalSize)}</p>
+                            <p>Compressed size: ${formatBytes(compressedSize)}</p>
+                            <p>Reduction: ${Math.round((1 - compressedSize / originalSize) * 100)}%</p>
+                        `;
+                        infoDiv.style.display = 'block';
+
+                        resultDiv.innerHTML = `
+                            <p>Compressed image:</p>
+                            <img src="${dataURL}" style="max-width: 100%; margin: 10px 0;">
+                            <a href="${dataURL}" download="compressed.jpg">Download Compressed Image</a>
+                        `;
+                        resultDiv.style.display = 'block';
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // Tool 3: Image Cropper
+        function getImageCropperContent() {
+            return `
+                <div class="tool-section">
+                    <h3>Crop Image</h3>
+                    <div class="file-input-wrapper">
+                        <input type="file" id="cropImageInput" accept="image/*">
+                        <label for="cropImageInput" class="file-input-label">Choose an image file</label>
+                    </div>
+                    <div id="cropArea" style="display: none;">
+                        <canvas id="cropCanvas"></canvas>
+                        <div class="flex-row">
+                            <div>
+                                <label for="cropX">X:</label>
+                                <input type="number" id="cropX" value="0" min="0">
+                            </div>
+                            <div>
+                                <label for="cropY">Y:</label>
+                                <input type="number" id="cropY" value="0" min="0">
+                            </div>
+                            <div>
+                                <label for="cropWidth">Width:</label>
+                                <input type="number" id="cropWidth" value="100" min="1">
+                            </div>
+                            <div>
+                                <label for="cropHeight">Height:</label>
+                                <input type="number" id="cropHeight" value="100" min="1">
+                            </div>
+                        </div>
+                        <button id="previewCropBtn">Preview Crop</button>
+                        <button id="applyCropBtn">Apply Crop</button>
+                    </div>
+                    <div id="cropResult" class="result" style="display: none;"></div>
+                </div>
+            `;
+        }
+
+        function initImageCropper() {
+            const imageInput = document.getElementById('cropImageInput');
+            const cropArea = document.getElementById('cropArea');
+            const canvas = document.getElementById('cropCanvas');
+            const ctx = canvas.getContext('2d');
+            const cropX = document.getElementById('cropX');
+            const cropY = document.getElementById('cropY');
+            const cropWidth = document.getElementById('cropWidth');
+            const cropHeight = document.getElementById('cropHeight');
+            const previewBtn = document.getElementById('previewCropBtn');
+            const applyBtn = document.getElementById('applyCropBtn');
+            const resultDiv = document.getElementById('cropResult');
+
+            let originalImage = null;
+
+            imageInput.addEventListener('change', function() {
+                if (!this.files.length) return;
+
+                const file = this.files[0];
+                const reader = new FileReader();
+
+                reader.onload = function(e) {
+                    originalImage = new Image();
+                    originalImage.onload = function() {
+                        canvas.width = originalImage.width;
+                        canvas.height = originalImage.height;
+                        ctx.drawImage(originalImage, 0, 0);
+
+                        cropWidth.value = Math.min(100, originalImage.width);
+                        cropHeight.value = Math.min(100, originalImage.height);
+
+                        cropArea.style.display = 'block';
+                    };
+                    originalImage.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+
+            previewBtn.addEventListener('click', function() {
+                if (!originalImage) return;
+
+                const x = parseInt(cropX.value);
+                const y = parseInt(cropY.value);
+                const width = parseInt(cropWidth.value);
+                const height = parseInt(cropHeight.value);
+
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(originalImage, 0, 0);
+
+                // Draw crop rectangle
+                ctx.strokeStyle = '#FFD700';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(x, y, width, height);
+            });
+
+            applyBtn.addEventListener('click', function() {
+                if (!originalImage) return;
+
+                const x = parseInt(cropX.value);
+                const y = parseInt(cropY.value);
+                const width = parseInt(cropWidth.value);
+                const height = parseInt(cropHeight.value);
+
+                const cropCanvas = document.createElement('canvas');
+                const cropCtx = cropCanvas.getContext('2d');
+                cropCanvas.width = width;
+                cropCanvas.height = height;
+                cropCtx.drawImage(originalImage, x, y, width, height, 0, 0, width, height);
+
+                const dataURL = cropCanvas.toDataURL();
+                resultDiv.innerHTML = `
+                    <p>Cropped image:</p>
+                    <img src="${dataURL}" style="max-width: 100%; margin: 10px 0;">
+                    <a href="${dataURL}" download="cropped.png">Download Cropped Image</a>
+                `;
+                resultDiv.style.display = 'block';
+            });
+        }
+
+        // Tool 4: Video Converter
+        function getVideoConverterContent() {
+            return `
+                <div class="tool-section">
+                    <h3>Convert Video Format</h3>
+                    <div class="file-input-wrapper">
+                        <input type="file" id="videoInput" accept="video/*">
+                        <label for="videoInput" class="file-input-label">Choose a video file</label>
+                    </div>
+                    <select id="videoFormatSelect">
+                        <option value="mp4">MP4</option>
+                        <option value="webm">WebM</option>
+                    </select>
+                    <button id="convertVideoBtn">Convert Video</button>
+                    <div id="videoConversionResult" class="result" style="display: none;"></div>
+                </div>
+            `;
+        }
+
+        function initVideoConverter() {
+            const videoInput = document.getElementById('videoInput');
+            const formatSelect = document.getElementById('videoFormatSelect');
+            const convertBtn = document.getElementById('convertVideoBtn');
+            const resultDiv = document.getElementById('videoConversionResult');
+
+            convertBtn.addEventListener('click', function() {
+                if (!videoInput.files.length) {
+                    alert('Please select a video file first.');
+                    return;
+                }
+
+                const file = videoInput.files[0];
+                const format = formatSelect.value;
+
+                // Note: This is a simplified implementation
+                // In a real application, you'd use MediaRecorder API or a service worker
+                // This just provides a download link to the original file with a new extension
+                const url = URL.createObjectURL(file);
+                resultDiv.innerHTML = `
+                    <p>Video conversion in browser is limited. For full conversion capabilities, consider using a server-based solution.</p>
+                    <p>Your original video:</p>
+                    <video controls style="max-width: 100%; margin: 10px 0;">
+                        <source src="${url}" type="${file.type}">
+                        Your browser does not support the video tag.
+                    </video>
+                    <a href="${url}" download="converted.${format}">Download Video (as ${format.toUpperCase()})</a>
+                `;
+                resultDiv.style.display = 'block';
+            });
+        }
+
+        // Tool 5: Audio Converter
+        function getAudioConverterContent() {
+            return `
+                <div class="tool-section">
+                    <h3>Convert Audio Format</h3>
+                    <div class="file-input-wrapper">
+                        <input type="file" id="audioInput" accept="audio/*">
+                        <label for="audioInput" class="file-input-label">Choose an audio file</label>
+                    </div>
+                    <select id="audioFormatSelect">
+                        <option value="wav">WAV</option>
+                        <option value="mp3">MP3</option>
+                    </select>
+                    <button id="convertAudioBtn">Convert Audio</button>
+                    <div id="audioConversionResult" class="result" style="display: none;"></div>
+                </div>
+            `;
+        }
+
+        function initAudioConverter() {
+            const audioInput = document.getElementById('audioInput');
+            const formatSelect = document.getElementById('audioFormatSelect');
+            const convertBtn = document.getElementById('convertAudioBtn');
+            const resultDiv = document.getElementById('audioConversionResult');
+
+            convertBtn.addEventListener('click', function() {
+                if (!audioInput.files.length) {
+                    alert('Please select an audio file first.');
+                    return;
+                }
+
+                const file = audioInput.files[0];
+                const format = formatSelect.value;
+
+                // Note: This is a simplified implementation
+                // In a real application, you'd use Web Audio API or a service worker
+                // This just provides a download link to the original file with a new extension
+                const url = URL.createObjectURL(file);
+                resultDiv.innerHTML = `
+                    <p>Audio conversion in browser is limited. For full conversion capabilities, consider using a server-based solution.</p>
+                    <p>Your original audio:</p>
+                    <audio controls style="width: 100%; margin: 10px 0;">
+                        <source src="${url}" type="${file.type}">
+                        Your browser does not support the audio element.
+                    </audio>
+                    <a href="${url}" download="converted.${format}">Download Audio (as ${format.toUpperCase()})</a>
+                `;
+                resultDiv.style.display = 'block';
+            });
+        }
+
+        // Tool 6: Audio Trimmer
+        function getAudioTrimmerContent() {
+            return `
+                <div class="tool-section">
+                    <h3>Trim Audio</h3>
+                    <div class="file-input-wrapper">
+                        <input type="file" id="trimAudioInput" accept="audio/*">
+                        <label for="trimAudioInput" class="file-input-label">Choose an audio file</label>
+                    </div>
+                    <div id="trimControls" style="display: none;">
+                        <audio id="trimAudioPlayer" controls style="width: 100%; margin: 10px 0;"></audio>
+                        <div class="flex-row">
+                            <div>
+                                <label for="startTime">Start Time (seconds):</label>
+                                <input type="number" id="startTime" value="0" min="0" step="0.1">
+                            </div>
+                            <div>
+                                <label for="endTime">End Time (seconds):</label>
+                                <input type="number" id="endTime" value="10" min="0" step="0.1">
+                            </div>
+                        </div>
+                        <button id="previewTrimBtn">Preview Trim</button>
+                        <button id="applyTrimBtn">Apply Trim</button>
+                    </div>
+                    <div id="trimResult" class="result" style="display: none;"></div>
+                </div>
+            `;
+        }
+
+        function initAudioTrimmer() {
+            const audioInput = document.getElementById('trimAudioInput');
+            const trimControls = document.getElementById('trimControls');
+            const audioPlayer = document.getElementById('trimAudioPlayer');
+            const startTime = document.getElementById('startTime');
+            const endTime = document.getElementById('endTime');
+            const previewBtn = document.getElementById('previewTrimBtn');
+            const applyBtn = document.getElementById('applyTrimBtn');
+            const resultDiv = document.getElementById('trimResult');
+
+            let audioBuffer = null;
+            let audioContext = null;
+
+            audioInput.addEventListener('change', function() {
+                if (!this.files.length) return;
+
+                const file = this.files[0];
+                const url = URL.createObjectURL(file);
+                audioPlayer.src = url;
+
+                // Set end time to audio duration when loaded
+                audioPlayer.addEventListener('loadedmetadata', function() {
+                    endTime.value = Math.floor(audioPlayer.duration);
+                });
+
+                trimControls.style.display = 'block';
+
+                // Load audio for processing
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    audioContext.decodeAudioData(e.target.result, function(buffer) {
+                        audioBuffer = buffer;
+                    });
+                };
+                reader.readAsArrayBuffer(file);
+            });
+
+            previewBtn.addEventListener('click', function() {
+                const start = parseFloat(startTime.value);
+                const end = parseFloat(endTime.value);
+                
+                if (start >= end) {
+                    alert('Start time must be less than end time.');
+                    return;
+                }
+
+                audioPlayer.currentTime = start;
+                // Note: This just seeks to the start time, a full preview would require creating a trimmed version
+            });
+
+            applyBtn.addEventListener('click', function() {
+                if (!audioBuffer) {
+                    alert('Please load an audio file first.');
+                    return;
+                }
+
+                const start = parseFloat(startTime.value);
+                const end = parseFloat(endTime.value);
+                
+                if (start >= end) {
+                    alert('Start time must be less than end time.');
+                    return;
+                }
+
+                // Note: This is a simplified implementation
+                // In a real application, you'd use Web Audio API to create a trimmed version
+                resultDiv.innerHTML = `
+                    <p>Audio trimming in browser is complex. For full trimming capabilities, consider using a server-based solution.</p>
+                    <p>Your original audio will play from ${start} to ${end} seconds:</p>
+                    <audio controls style="width: 100%; margin: 10px 0;">
+                        <source src="${audioPlayer.src}" type="${audioInput.files[0].type}">
+                        Your browser does not support the audio element.
+                    </audio>
+                    <p>Use the audio player controls to play from ${start} to ${end} seconds.</p>
+                `;
+                resultDiv.style.display = 'block';
+            });
+        }
+
+        // Tool 7: Age Calculator
+        function getAgeCalculatorContent() {
+            return `
+                <div class="tool-section">
+                    <h3>Calculate Your Age</h3>
+                    <label for="birthDate">Date of Birth:</label>
+                    <input type="date" id="birthDate">
+                    <button id="calculateAgeBtn">Calculate Age</button>
+                    <div id="ageResult" class="result" style="display: none;"></div>
+                </div>
+            `;
+        }
+
+        function initAgeCalculator() {
+            const birthDateInput = document.getElementById('birthDate');
+            const calculateBtn = document.getElementById('calculateAgeBtn');
+            const resultDiv = document.getElementById('ageResult');
+
+            // Set max date to today
+            birthDateInput.max = new Date().toISOString().split('T')[0];
+
+            calculateBtn.addEventListener('click', function() {
+                if (!birthDateInput.value) {
+                    alert('Please select your date of birth.');
+                    return;
+                }
+
+                const birthDate = new Date(birthDateInput.value);
+                const today = new Date();
+
+                let years = today.getFullYear() - birthDate.getFullYear();
+                let months = today.getMonth() - birthDate.getMonth();
+                let days = today.getDate() - birthDate.getDate();
+
+                if (days < 0) {
+                    months--;
+                    // Get days in previous month
+                    const prevMonth = new Date(today.getFullYear(), today.getMonth(), 0);
+                    days += prevMonth.getDate();
+                }
+
+                if (months < 0) {
+                    years--;
+                    months += 12;
+                }
+
+                resultDiv.innerHTML = `
+                    <p>Your age is:</p>
+                    <p><strong>${years}</strong> years, <strong>${months}</strong> months, and <strong>${days}</strong> days</p>
+                    <p>Total days: <strong>${Math.floor((today - birthDate) / (1000 * 60 * 60 * 24))}</strong></p>
+                `;
+                resultDiv.style.display = 'block';
+            });
+        }
+
+        // Tool 8: EMI Calculator
+        function getEMICalculatorContent() {
+            return `
+                <div class="tool-section">
+                    <h3>Calculate EMI</h3>
+                    <div class="flex-row">
+                        <div>
+                            <label for="loanAmount">Loan Amount ($):</label>
+                            <input type="number" id="loanAmount" value="10000" min="1">
+                        </div>
+                        <div>
+                            <label for="interestRate">Interest Rate (% per year):</label>
+                            <input type="number" id="interestRate" value="8" min="0.1" step="0.1">
+                        </div>
+                        <div>
+                            <label for="loanTerm">Loan Term (months):</label>
+                            <input type="number" id="loanTerm" value="60" min="1">
+                        </div>
+                    </div>
+                    <button id="calculateEMIBtn">Calculate EMI</button>
+                    <div id="emiResult" class="result" style="display: none;"></div>
+                </div>
+            `;
+        }
+
+        function initEMICalculator() {
+            const loanAmountInput = document.getElementById('loanAmount');
+            const interestRateInput = document.getElementById('interestRate');
+            const loanTermInput = document.getElementById('loanTerm');
+            const calculateBtn = document.getElementById('calculateEMIBtn');
+            const resultDiv = document.getElementById('emiResult');
+
+            calculateBtn.addEventListener('click', function() {
+                const loanAmount = parseFloat(loanAmountInput.value);
+                const annualInterestRate = parseFloat(interestRateInput.value);
+                const loanTermMonths = parseInt(loanTermInput.value);
+
+                if (!loanAmount || !annualInterestRate || !loanTermMonths) {
+                    alert('Please fill in all fields with valid numbers.');
+                    return;
+                }
+
+                const monthlyInterestRate = (annualInterestRate / 100) / 12;
+                const emi = loanAmount * monthlyInterestRate * 
+                            Math.pow(1 + monthlyInterestRate, loanTermMonths) / 
+                            (Math.pow(1 + monthlyInterestRate, loanTermMonths) - 1);
+
+                const totalPayment = emi * loanTermMonths;
+                const totalInterest = totalPayment - loanAmount;
+
+                resultDiv.innerHTML = `
+                    <p>Monthly EMI: <strong>$${emi.toFixed(2)}</strong></p>
+                    <p>Total Payment: <strong>$${totalPayment.toFixed(2)}</strong></p>
+                    <p>Total Interest: <strong>$${totalInterest.toFixed(2)}</strong></p>
+                    <p>Loan Amount: <strong>$${loanAmount.toFixed(2)}</strong></p>
+                    <p>Loan Term: <strong>${loanTermMonths} months</strong></p>
+                `;
+                resultDiv.style.display = 'block';
+            });
+        }
+
+        // Tool 9: SIP Calculator
+        function getSIPCalculatorContent() {
+            return `
+                <div class="tool-section">
+                    <h3>Calculate SIP Returns</h3>
+                    <div class="flex-row">
+                        <div>
+                            <label for="monthlyInvestment">Monthly Investment ($):</label>
+                            <input type="number" id="monthlyInvestment" value="100" min="1">
+                        </div>
+                        <div>
+                            <label for="sipInterestRate">Expected Annual Return (%):</label>
+                            <input type="number" id="sipInterestRate" value="12" min="0.1" step="0.1">
+                        </div>
+                        <div>
+                            <label for="sipTerm">Investment Period (years):</label>
+                            <input type="number" id="sipTerm" value="10" min="1">
+                        </div>
+                    </div>
+                    <button id="calculateSIPBtn">Calculate SIP</button>
+                    <div id="sipResult" class="result" style="display: none;"></div>
+                </div>
+            `;
+        }
+
+        function initSIPCalculator() {
+            const monthlyInvestmentInput = document.getElementById('monthlyInvestment');
+            const interestRateInput = document.getElementById('sipInterestRate');
+            const termInput = document.getElementById('sipTerm');
+            const calculateBtn = document.getElementById('calculateSIPBtn');
+            const resultDiv = document.getElementById('sipResult');
+
+            calculateBtn.addEventListener('click', function() {
+                const monthlyInvestment = parseFloat(monthlyInvestmentInput.value);
+                const annualInterestRate = parseFloat(interestRateInput.value);
+                const termYears = parseInt(termInput.value);
+
+                if (!monthlyInvestment || !annualInterestRate || !termYears) {
+                    alert('Please fill in all fields with valid numbers.');
+                    return;
+                }
+
+                const monthlyRate = annualInterestRate / 100 / 12;
+                const months = termYears * 12;
+                
+                // Future Value of SIP formula
+                const futureValue = monthlyInvestment * 
+                                  ((Math.pow(1 + monthlyRate, months) - 1) / monthlyRate) * 
+                                  (1 + monthlyRate);
+
+                const totalInvestment = monthlyInvestment * months;
+                const estimatedReturns = futureValue - totalInvestment;
+
+                resultDiv.innerHTML = `
+                    <p>Monthly Investment: <strong>$${monthlyInvestment.toFixed(2)}</strong></p>
+                    <p>Investment Period: <strong>${termYears} years</strong></p>
+                    <p>Expected Annual Return: <strong>${annualInterestRate}%</strong></p>
+                    <p>Total Investment: <strong>$${totalInvestment.toFixed(2)}</strong></p>
+                    <p>Estimated Returns: <strong>$${estimatedReturns.toFixed(2)}</strong></p>
+                    <p>Future Value: <strong>$${futureValue.toFixed(2)}</strong></p>
+                `;
+                resultDiv.style.display = 'block';
+            });
+        }
+
+        // Tool 10: QR Code Generator
+        function getQRCodeGeneratorContent() {
+            return `
+                <div class="tool-section">
+                    <h3>Generate QR Code</h3>
+                    <label for="qrText">Text or URL:</label>
+                    <textarea id="qrText" placeholder="Enter text or URL to encode" rows="3"></textarea>
+                    <button id="generateQRBtn">Generate QR Code</button>
+                    <div id="qrResult" class="result" style="display: none; text-align: center;"></div>
+                </div>
+            `;
+        }
+
+        function initQRCodeGenerator() {
+            const qrTextInput = document.getElementById('qrText');
+            const generateBtn = document.getElementById('generateQRBtn');
+            const resultDiv = document.getElementById('qrResult');
+
+            generateBtn.addEventListener('click', function() {
+                const text = qrTextInput.value.trim();
+                if (!text) {
+                    alert('Please enter some text or a URL.');
+                    return;
+                }
+
+                // Using Google Charts API for QR code generation
+                const qrUrl = `https://chart.googleapis.com/chart?cht=qr&chs=300x300&chl=${encodeURIComponent(text)}`;
+                
+                resultDiv.innerHTML = `
+                    <p>QR Code for: "${text}"</p>
+                    <img src="${qrUrl}" alt="QR Code" style="max-width: 300px; margin: 10px auto;">
+                    <br>
+                    <a href="${qrUrl}" download="qrcode.png">Download QR Code</a>
+                `;
+                resultDiv.style.display = 'block';
+            });
+        }
+
+        // Tool 11: Password Generator
+        function getPasswordGeneratorContent() {
+            return `
+                <div class="tool-section">
+                    <h3>Generate Secure Password</h3>
+                    <div class="flex-row">
+                        <div>
+                            <label for="passwordLength">Length:</label>
+                            <input type="number" id="passwordLength" value="12" min="8" max="50">
+                        </div>
+                        <div>
+                            <label for="includeUppercase">Include Uppercase</label>
+                            <input type="checkbox" id="includeUppercase" checked>
+                        </div>
+                        <div>
+                            <label for="includeLowercase">Include Lowercase</label>
+                            <input type="checkbox" id="includeLowercase" checked>
+                        </div>
+                        <div>
+                            <label for="includeNumbers">Include Numbers</label>
+                            <input type="checkbox" id="includeNumbers" checked>
+                        </div>
+                        <div>
+                            <label for="includeSymbols">Include Symbols</label>
+                            <input type="checkbox" id="includeSymbols" checked>
+                        </div>
+                    </div>
+                    <button id="generatePasswordBtn">Generate Password</button>
+                    <div id="passwordResult" class="result" style="display: none;"></div>
+                </div>
+            `;
+        }
+
+        function initPasswordGenerator() {
+            const lengthInput = document.getElementById('passwordLength');
+            const uppercaseCheckbox = document.getElementById('includeUppercase');
+            const lowercaseCheckbox = document.getElementById('includeLowercase');
+            const numbersCheckbox = document.getElementById('includeNumbers');
+            const symbolsCheckbox = document.getElementById('includeSymbols');
+            const generateBtn = document.getElementById('generatePasswordBtn');
+            const resultDiv = document.getElementById('passwordResult');
+
+            generateBtn.addEventListener('click', function() {
+                const length = parseInt(lengthInput.value);
+                const includeUppercase = uppercaseCheckbox.checked;
+                const includeLowercase = lowercaseCheckbox.checked;
+                const includeNumbers = numbersCheckbox.checked;
+                const includeSymbols = symbolsCheckbox.checked;
+
+                if (!includeUppercase && !includeLowercase && !includeNumbers && !includeSymbols) {
+                    alert('Please select at least one character type.');
+                    return;
+                }
+
+                let charset = '';
+                if (includeUppercase) charset += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+                if (includeLowercase) charset += 'abcdefghijklmnopqrstuvwxyz';
+                if (includeNumbers) charset += '0123456789';
+                if (includeSymbols) charset += '!@#$%^&*()_+-=[]{}|;:,.<>?';
+
+                let password = '';
+                for (let i = 0; i < length; i++) {
+                    const randomIndex = Math.floor(Math.random() * charset.length);
+                    password += charset[randomIndex];
+                }
+
+                resultDiv.innerHTML = `
+                    <p>Generated Password:</p>
+                    <p style="font-size: 1.2rem; font-family: monospace; background: #1E1E2F; padding: 10px; border-radius: 5px; word-break: break-all;">${password}</p>
+                    <button id="copyPasswordBtn">Copy to Clipboard</button>
+                `;
+                resultDiv.style.display = 'block';
+
+                // Add copy functionality
+                document.getElementById('copyPasswordBtn').addEventListener('click', function() {
+                    navigator.clipboard.writeText(password).then(function() {
+                        alert('Password copied to clipboard!');
+                    }, function() {
+                        alert('Failed to copy password. Please select and copy manually.');
+                    });
+                });
+            });
+        }
+
+        // Tool 12: Word Counter
+        function getWordCounterContent() {
+            return `
+                <div class="tool-section">
+                    <h3>Count Words and Characters</h3>
+                    <textarea id="wordCounterText" placeholder="Enter your text here..." rows="10"></textarea>
+                    <div id="wordCounterResult" class="result">
+                        <p>Words: <span id="wordCount">0</span></p>
+                        <p>Characters: <span id="charCount">0</span></p>
+                        <p>Characters (no spaces): <span id="charNoSpacesCount">0</span></p>
+                        <p>Sentences: <span id="sentenceCount">0</span></p>
+                        <p>Paragraphs: <span id="paragraphCount">0</span></p>
+                        <p>Reading Time: <span id="readingTime">0</span> minutes</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        function initWordCounter() {
+            const textInput = document.getElementById('wordCounterText');
+            const wordCountSpan = document.getElementById('wordCount');
+            const charCountSpan = document.getElementById('charCount');
+            const charNoSpacesSpan = document.getElementById('charNoSpacesCount');
+            const sentenceCountSpan = document.getElementById('sentenceCount');
+            const paragraphCountSpan = document.getElementById('paragraphCount');
+            const readingTimeSpan = document.getElementById('readingTime');
+
+            textInput.addEventListener('input', function() {
+                const text = this.value;
+                
+                // Word count (split by spaces and filter out empty strings)
+                const words = text.trim() ? text.trim().split(/\s+/) : [];
+                wordCountSpan.textContent = words.length;
+                
+                // Character count
+                charCountSpan.textContent = text.length;
+                
+                // Character count without spaces
+                charNoSpacesSpan.textContent = text.replace(/\s/g, '').length;
+                
+                // Sentence count (split by . ! ?)
+                const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0);
+                sentenceCountSpan.textContent = sentences.length;
+                
+                // Paragraph count (split by newlines)
+                const paragraphs = text.split(/\n+/).filter(p => p.trim().length > 0);
+                paragraphCountSpan.textContent = paragraphs.length;
+                
+                // Reading time (average reading speed: 200 words per minute)
+                const readingTime = Math.ceil(words.length / 200);
+                readingTimeSpan.textContent = readingTime;
+            });
+        }
+
+        // Tool 13: Base64 Encoder/Decoder
+        function getBase64ConverterContent() {
+            return `
+                <div class="tool-section">
+                    <h3>Base64 Encoder/Decoder</h3>
+                    <div>
+                        <label for="base64Action">Action:</label>
+                        <select id="base64Action">
+                            <option value="encode">Encode to Base64</option>
+                            <option value="decode">Decode from Base64</option>
+                        </select>
+                    </div>
+                    <textarea id="base64Input" placeholder="Enter text to encode or decode" rows="5"></textarea>
+                    <button id="base64ConvertBtn">Convert</button>
+                    <div id="base64Result" class="result" style="display: none;"></div>
+                </div>
+            `;
+        }
+
+        function initBase64Converter() {
+            const actionSelect = document.getElementById('base64Action');
+            const inputTextarea = document.getElementById('base64Input');
+            const convertBtn = document.getElementById('base64ConvertBtn');
+            const resultDiv = document.getElementById('base64Result');
+
+            convertBtn.addEventListener('click', function() {
+                const input = inputTextarea.value.trim();
+                const action = actionSelect.value;
+
+                if (!input) {
+                    alert('Please enter some text.');
+                    return;
+                }
+
+                try {
+                    let result;
+                    if (action === 'encode') {
+                        result = btoa(unescape(encodeURIComponent(input)));
+                    } else {
+                        result = decodeURIComponent(escape(atob(input)));
+                    }
+
+                    resultDiv.innerHTML = `
+                        <p>Result:</p>
+                        <p style="word-break: break-all; background: #1E1E2F; padding: 10px; border-radius: 5px;">${result}</p>
+                        <button id="copyBase64Btn">Copy to Clipboard</button>
+                    `;
+                    resultDiv.style.display = 'block';
+
+                    // Add copy functionality
+                    document.getElementById('copyBase64Btn').addEventListener('click', function() {
+                        navigator.clipboard.writeText(result).then(function() {
+                            alert('Result copied to clipboard!');
+                        }, function() {
+                            alert('Failed to copy result. Please select and copy manually.');
+                        });
+                    });
+                } catch (error) {
+                    alert('Error: ' + error.message);
+                }
+            });
+        }
+
+        // Tool 14: Color Picker
+        function getColorPickerContent() {
+            return `
+                <div class="tool-section">
+                    <h3>Color Picker</h3>
+                    <div style="text-align: center;">
+                        <input type="color" id="colorPicker" value="#ffd700">
+                        <div id="colorPreview" style="width: 100px; height: 100px; margin: 10px auto; border: 2px solid #fff; border-radius: 5px;"></div>
+                    </div>
+                    <div id="colorValues" class="result">
+                        <p>HEX: <span id="hexValue">#ffd700</span></p>
+                        <p>RGB: <span id="rgbValue">rgb(255, 215, 0)</span></p>
+                        <p>HSL: <span id="hslValue">hsl(51, 100%, 50%)</span></p>
+                    </div>
+                </div>
+            `;
+        }
+
+        function initColorPicker() {
+            const colorPicker = document.getElementById('colorPicker');
+            const colorPreview = document.getElementById('colorPreview');
+            const hexValue = document.getElementById('hexValue');
+            const rgbValue = document.getElementById('rgbValue');
+            const hslValue = document.getElementById('hslValue');
+
+            // Set initial preview
+            colorPreview.style.backgroundColor = colorPicker.value;
+            updateColorValues(colorPicker.value);
+
+            colorPicker.addEventListener('input', function() {
+                const color = this.value;
+                colorPreview.style.backgroundColor = color;
+                updateColorValues(color);
+            });
+
+            function updateColorValues(hex) {
+                hexValue.textContent = hex;
+                
+                // Convert HEX to RGB
+                const r = parseInt(hex.slice(1, 3), 16);
+                const g = parseInt(hex.slice(3, 5), 16);
+                const b = parseInt(hex.slice(5, 7), 16);
+                rgbValue.textContent = `rgb(${r}, ${g}, ${b})`;
+                
+                // Convert RGB to HSL
+                const hsl = rgbToHsl(r, g, b);
+                hslValue.textContent = `hsl(${Math.round(hsl.h)}, ${Math.round(hsl.s)}%, ${Math.round(hsl.l)}%)`;
+            }
+
+            function rgbToHsl(r, g, b) {
+                r /= 255;
+                g /= 255;
+                b /= 255;
+                
+                const max = Math.max(r, g, b);
+                const min = Math.min(r, g, b);
+                let h, s, l = (max + min) / 2;
+                
+                if (max === min) {
+                    h = s = 0; // achromatic
+                } else {
+                    const d = max - min;
+                    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+                    
+                    switch (max) {
+                        case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+                        case g: h = (b - r) / d + 2; break;
+                        case b: h = (r - g) / d + 4; break;
+                    }
+                    
+                    h /= 6;
+                }
+                
+                return {
+                    h: h * 360,
+                    s: s * 100,
+                    l: l * 100
+                };
+            }
+        }
+
+        // Tool 15: Text to Speech
+        function getTextToSpeechContent() {
+            return `
+                <div class="tool-section">
+                    <h3>Text to Speech</h3>
+                    <textarea id="ttsText" placeholder="Enter text to convert to speech" rows="5"></textarea>
+                    <div class="flex-row">
+                        <div>
+                            <label for="voiceSelect">Voice:</label>
+                            <select id="voiceSelect"></select>
+                        </div>
+                        <div>
+                            <label for="rateSelect">Rate:</label>
+                            <select id="rateSelect">
+                                <option value="0.5">0.5x</option>
+                                <option value="0.75">0.75x</option>
+                                <option value="1" selected>1x</option>
+                                <option value="1.25">1.25x</option>
+                                <option value="1.5">1.5x</option>
+                                <option value="2">2x</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="pitchSelect">Pitch:</label>
+                            <select id="pitchSelect">
+                                <option value="0.5">0.5</option>
+                                <option value="0.75">0.75</option>
+                                <option value="1" selected>1</option>
+                                <option value="1.25">1.25</option>
+                                <option value="1.5">1.5</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button id="speakBtn">Speak</button>
+                    <button id="stopSpeakBtn">Stop</button>
+                </div>
+            `;
+        }
+
+        function initTextToSpeech() {
+            const textInput = document.getElementById('ttsText');
+            const voiceSelect = document.getElementById('voiceSelect');
+            const rateSelect = document.getElementById('rateSelect');
+            const pitchSelect = document.getElementById('pitchSelect');
+            const speakBtn = document.getElementById('speakBtn');
+            const stopBtn = document.getElementById('stopSpeakBtn');
+
+            let voices = [];
+
+            function loadVoices() {
+                voices = speechSynthesis.getVoices();
+                voiceSelect.innerHTML = '';
+                
+                voices.forEach(voice => {
+                    const option = document.createElement('option');
+                    option.value = voice.name;
+                    option.textContent = `${voice.name} (${voice.lang})`;
+                    voiceSelect.appendChild(option);
+                });
+            }
+
+            // Load voices when they become available
+            if (speechSynthesis.onvoiceschanged !== undefined) {
+                speechSynthesis.onvoiceschanged = loadVoices;
+            }
+
+            loadVoices();
+
+            speakBtn.addEventListener('click', function() {
+                const text = textInput.value.trim();
+                if (!text) {
+                    alert('Please enter some text to speak.');
+                    return;
+                }
+
+                // Stop any ongoing speech
+                speechSynthesis.cancel();
+
+                const utterance = new SpeechSynthesisUtterance(text);
+                
+                // Set voice
+                const selectedVoice = voices.find(voice => voice.name === voiceSelect.value);
+                if (selectedVoice) {
+                    utterance.voice = selectedVoice;
+                }
+                
+                // Set rate and pitch
+                utterance.rate = parseFloat(rateSelect.value);
+                utterance.pitch = parseFloat(pitchSelect.value);
+                
+                speechSynthesis.speak(utterance);
+            });
+
+            stopBtn.addEventListener('click', function() {
+                speechSynthesis.cancel();
+            });
+        }
+
+        // Tool 16: Speech to Text
+        function getSpeechToTextContent() {
+            return `
+                <div class="tool-section">
+                    <h3>Speech to Text</h3>
+                    <div id="speechResult" class="result" style="min-height: 100px; margin-bottom: 1rem;">
+                        <p>Click "Start Listening" and speak...</p>
+                    </div>
+                    <button id="startListenBtn">Start Listening</button>
+                    <button id="stopListenBtn">Stop Listening</button>
+                    <button id="copySpeechBtn">Copy Text</button>
+                </div>
+            `;
+        }
+
+        function initSpeechToText() {
+            const resultDiv = document.getElementById('speechResult');
+            const startBtn = document.getElementById('startListenBtn');
+            const stopBtn = document.getElementById('stopListenBtn');
+            const copyBtn = document.getElementById('copySpeechBtn');
+
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            
+            if (!SpeechRecognition) {
+                resultDiv.innerHTML = '<p>Speech recognition is not supported in your browser. Try using Chrome or Edge.</p>';
+                startBtn.disabled = true;
+                stopBtn.disabled = true;
+                return;
+            }
+
+            const recognition = new SpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.lang = 'en-US';
+
+            let finalTranscript = '';
+
+            recognition.onstart = function() {
+                resultDiv.innerHTML = '<p>Listening... Speak now.</p>';
+                startBtn.disabled = true;
+                stopBtn.disabled = false;
+            };
+
+            recognition.onresult = function(event) {
+                let interimTranscript = '';
+                
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    const transcript = event.results[i][0].transcript;
+                    if (event.results[i].isFinal) {
+                        finalTranscript += transcript + ' ';
+                    } else {
+                        interimTranscript += transcript;
+                    }
+                }
+                
+                resultDiv.innerHTML = `
+                    <p>${finalTranscript}</p>
+                    <p style="color: #aaa;"><em>${interimTranscript}</em></p>
+                `;
+            };
+
+            recognition.onerror = function(event) {
+                console.error('Speech recognition error', event.error);
+                resultDiv.innerHTML = `<p>Error: ${event.error}</p>`;
+                startBtn.disabled = false;
+                stopBtn.disabled = true;
+            };
+
+            recognition.onend = function() {
+                startBtn.disabled = false;
+                stopBtn.disabled = true;
+            };
+
+            startBtn.addEventListener('click', function() {
+                finalTranscript = '';
+                recognition.start();
+            });
+
+            stopBtn.addEventListener('click', function() {
+                recognition.stop();
+            });
+
+            copyBtn.addEventListener('click', function() {
+                if (!finalTranscript) {
+                    alert('No text to copy. Please start listening first.');
+                    return;
+                }
+                
+                navigator.clipboard.writeText(finalTranscript).then(function() {
+                    alert('Text copied to clipboard!');
+                }, function() {
+                    alert('Failed to copy text. Please select and copy manually.');
+                });
+            });
+        }
+
+        // Tool 17: JSON Formatter
+        function getJSONFormatterContent() {
+            return `
+                <div class="tool-section">
+                    <h3>JSON Formatter & Validator</h3>
+                    <textarea id="jsonInput" placeholder='Paste your JSON here... Example: {"name": "John", "age": 30}' rows="10"></textarea>
+                    <button id="formatJsonBtn">Format JSON</button>
+                    <button id="validateJsonBtn">Validate JSON</button>
+                    <button id="minifyJsonBtn">Minify JSON</button>
+                    <div id="jsonResult" class="result" style="display: none;"></div>
+                </div>
+            `;
+        }
+
+        function initJSONFormatter() {
+            const jsonInput = document.getElementById('jsonInput');
+            const formatBtn = document.getElementById('formatJsonBtn');
+            const validateBtn = document.getElementById('validateJsonBtn');
+            const minifyBtn = document.getElementById('minifyJsonBtn');
+            const resultDiv = document.getElementById('jsonResult');
+
+            formatBtn.addEventListener('click', function() {
+                try {
+                    const parsed = JSON.parse(jsonInput.value);
+                    const formatted = JSON.stringify(parsed, null, 2);
+                    resultDiv.innerHTML = `
+                        <p>Formatted JSON:</p>
+                        <pre style="background: #1E1E2F; padding: 10px; border-radius: 5px; overflow: auto;">${formatted}</pre>
+                        <button id="copyJsonBtn">Copy JSON</button>
+                    `;
+                    resultDiv.style.display = 'block';
+
+                    document.getElementById('copyJsonBtn').addEventListener('click', function() {
+                        navigator.clipboard.writeText(formatted).then(function() {
+                            alert('JSON copied to clipboard!');
+                        }, function() {
+                            alert('Failed to copy JSON. Please select and copy manually.');
+                        });
+                    });
+                } catch (error) {
+                    resultDiv.innerHTML = `<p style="color: #ff6b6b;">Error: ${error.message}</p>`;
+                    resultDiv.style.display = 'block';
+                }
+            });
+
+            validateBtn.addEventListener('click', function() {
+                try {
+                    JSON.parse(jsonInput.value);
+                    resultDiv.innerHTML = '<p style="color: #51cf66;">✓ Valid JSON</p>';
+                    resultDiv.style.display = 'block';
+                } catch (error) {
+                    resultDiv.innerHTML = `<p style="color: #ff6b6b;">✗ Invalid JSON: ${error.message}</p>`;
+                    resultDiv.style.display = 'block';
+                }
+            });
+
+            minifyBtn.addEventListener('click', function() {
+                try {
+                    const parsed = JSON.parse(jsonInput.value);
+                    const minified = JSON.stringify(parsed);
+                    resultDiv.innerHTML = `
+                        <p>Minified JSON:</p>
+                        <pre style="background: #1E1E2F; padding: 10px; border-radius: 5px; overflow: auto;">${minified}</pre>
+                        <button id="copyMinifiedBtn">Copy Minified JSON</button>
+                    `;
+                    resultDiv.style.display = 'block';
+
+                    document.getElementById('copyMinifiedBtn').addEventListener('click', function() {
+                        navigator.clipboard.writeText(minified).then(function() {
+                            alert('Minified JSON copied to clipboard!');
+                        }, function() {
+                            alert('Failed to copy JSON. Please select and copy manually.');
+                        });
+                    });
+                } catch (error) {
+                    resultDiv.innerHTML = `<p style="color: #ff6b6b;">Error: ${error.message}</p>`;
+                    resultDiv.style.display = 'block';
+                }
+            });
+        }
+
+        // Tool 18: Unit Converter
+        function getUnitConverterContent() {
+            return `
+                <div class="tool-section">
+                    <h3>Unit Converter</h3>
+                    <div class="flex-row">
+                        <div>
+                            <label for="converterValue">Value:</label>
+                            <input type="number" id="converterValue" value="1" step="any">
+                        </div>
+                        <div>
+                            <label for="converterCategory">Category:</label>
+                            <select id="converterCategory">
+                                <option value="length">Length</option>
+                                <option value="weight">Weight</option>
+                                <option value="temperature">Temperature</option>
+                                <option value="area">Area</option>
+                                <option value="volume">Volume</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="fromUnit">From Unit:</label>
+                            <select id="fromUnit"></select>
+                        </div>
+                        <div>
+                            <label for="toUnit">To Unit:</label>
+                            <select id="toUnit"></select>
+                        </div>
+                    </div>
+                    <button id="convertUnitsBtn">Convert</button>
+                    <div id="unitConversionResult" class="result" style="display: none;"></div>
+                </div>
+            `;
+        }
+
+        function initUnitConverter() {
+            const valueInput = document.getElementById('converterValue');
+            const categorySelect = document.getElementById('converterCategory');
+            const fromUnitSelect = document.getElementById('fromUnit');
+            const toUnitSelect = document.getElementById('toUnit');
+            const convertBtn = document.getElementById('convertUnitsBtn');
+            const resultDiv = document.getElementById('unitConversionResult');
+
+            const units = {
+                length: {
+                    meter: 1,
+                    kilometer: 1000,
+                    centimeter: 0.01,
+                    millimeter: 0.001,
+                    mile: 1609.34,
+                    yard: 0.9144,
+                    foot: 0.3048,
+                    inch: 0.0254
+                },
+                weight: {
+                    kilogram: 1,
+                    gram: 0.001,
+                    milligram: 0.000001,
+                    pound: 0.453592,
+                    ounce: 0.0283495,
+                    ton: 1000
+                },
+                temperature: {
+                    celsius: 'celsius',
+                    fahrenheit: 'fahrenheit',
+                    kelvin: 'kelvin'
+                },
+                area: {
+                    'square meter': 1,
+                    'square kilometer': 1000000,
+                    'square mile': 2589988.11,
+                    'square yard': 0.836127,
+                    'square foot': 0.092903,
+                    'square inch': 0.00064516,
+                    acre: 4046.86,
+                    hectare: 10000
+                },
+                volume: {
+                    liter: 1,
+                    milliliter: 0.001,
+                    'cubic meter': 1000,
+                    'cubic centimeter': 0.001,
+                    gallon: 3.78541,
+                    quart: 0.946353,
+                    pint: 0.473176,
+                    cup: 0.24,
+                    'fluid ounce': 0.0295735
+                }
+            };
+
+            function populateUnitSelects() {
+                const category = categorySelect.value;
+                const unitOptions = Object.keys(units[category]);
+                
+                fromUnitSelect.innerHTML = '';
+                toUnitSelect.innerHTML = '';
+                
+                unitOptions.forEach(unit => {
+                    const fromOption = document.createElement('option');
+                    fromOption.value = unit;
+                    fromOption.textContent = unit;
+                    fromUnitSelect.appendChild(fromOption);
+                    
+                    const toOption = document.createElement('option');
+                    toOption.value = unit;
+                    toOption.textContent = unit;
+                    toUnitSelect.appendChild(toOption);
+                });
+                
+                // Set different default to units
+                if (category === 'length') {
+                    toUnitSelect.value = 'kilometer';
+                } else if (category === 'weight') {
+                    toUnitSelect.value = 'pound';
+                } else if (category === 'temperature') {
+                    toUnitSelect.value = 'fahrenheit';
+                } else if (category === 'area') {
+                    toUnitSelect.value = 'square foot';
+                } else if (category === 'volume') {
+                    toUnitSelect.value = 'gallon';
+                }
+            }
+
+            // Initial population
+            populateUnitSelects();
+
+            categorySelect.addEventListener('change', populateUnitSelects);
+
+            convertBtn.addEventListener('click', function() {
+                const value = parseFloat(valueInput.value);
+                const category = categorySelect.value;
+                const fromUnit = fromUnitSelect.value;
+                const toUnit = toUnitSelect.value;
+
+                if (isNaN(value)) {
+                    alert('Please enter a valid number.');
+                    return;
+                }
+
+                let result;
+                
+                if (category === 'temperature') {
+                    // Temperature conversion requires special handling
+                    if (fromUnit === 'celsius') {
+                        if (toUnit === 'fahrenheit') {
+                            result = (value * 9/5) + 32;
+                        } else if (toUnit === 'kelvin') {
+                            result = value + 273.15;
+                        } else {
+                            result = value;
+                        }
+                    } else if (fromUnit === 'fahrenheit') {
+                        if (toUnit === 'celsius') {
+                            result = (value - 32) * 5/9;
+                        } else if (toUnit === 'kelvin') {
+                            result = (value - 32) * 5/9 + 273.15;
+                        } else {
+                            result = value;
+                        }
+                    } else if (fromUnit === 'kelvin') {
+                        if (toUnit === 'celsius') {
+                            result = value - 273.15;
+                        } else if (toUnit === 'fahrenheit') {
+                            result = (value - 273.15) * 9/5 + 32;
+                        } else {
+                            result = value;
+                        }
+                    }
+                } else {
+                    // Standard conversion for other categories
+                    const fromFactor = units[category][fromUnit];
+                    const toFactor = units[category][toUnit];
+                    result = value * fromFactor / toFactor;
+                }
+
+                resultDiv.innerHTML = `
+                    <p>${value} ${fromUnit} = <strong>${result.toFixed(6)}</strong> ${toUnit}</p>
+                `;
+                resultDiv.style.display = 'block';
+            });
+        }
+
+        // Tool 19: BMI Calculator
+        function getBMICalculatorContent() {
+            return `
+                <div class="tool-section">
+                    <h3>BMI Calculator</h3>
+                    <div class="flex-row">
+                        <div>
+                            <label for="height">Height:</label>
+                            <input type="number" id="height" placeholder="Height" step="0.1">
+                            <select id="heightUnit">
+                                <option value="cm">cm</option>
+                                <option value="m">m</option>
+                                <option value="in">inches</option>
+                                <option value="ft">feet</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="weight">Weight:</label>
+                            <input type="number" id="weight" placeholder="Weight" step="0.1">
+                            <select id="weightUnit">
+                                <option value="kg">kg</option>
+                                <option value="lb">pounds</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button id="calculateBMIBtn">Calculate BMI</button>
+                    <div id="bmiResult" class="result" style="display: none;"></div>
+                </div>
+            `;
+        }
+
+        function initBMICalculator() {
+            const heightInput = document.getElementById('height');
+            const heightUnitSelect = document.getElementById('heightUnit');
+            const weightInput = document.getElementById('weight');
+            const weightUnitSelect = document.getElementById('weightUnit');
+            const calculateBtn = document.getElementById('calculateBMIBtn');
+            const resultDiv = document.getElementById('bmiResult');
+
+            calculateBtn.addEventListener('click', function() {
+                const height = parseFloat(heightInput.value);
+                const heightUnit = heightUnitSelect.value;
+                const weight = parseFloat(weightInput.value);
+                const weightUnit = weightUnitSelect.value;
+
+                if (isNaN(height) || isNaN(weight) || height <= 0 || weight <= 0) {
+                    alert('Please enter valid height and weight values.');
+                    return;
+                }
+
+                // Convert to metric units
+                let heightInMeters;
+                switch(heightUnit) {
+                    case 'cm': heightInMeters = height / 100; break;
+                    case 'm': heightInMeters = height; break;
+                    case 'in': heightInMeters = height * 0.0254; break;
+                    case 'ft': heightInMeters = height * 0.3048; break;
+                }
+
+                let weightInKg;
+                switch(weightUnit) {
+                    case 'kg': weightInKg = weight; break;
+                    case 'lb': weightInKg = weight * 0.453592; break;
+                }
+
+                // Calculate BMI
+                const bmi = weightInKg / (heightInMeters * heightInMeters);
+                
+                // Determine category
+                let category;
+                if (bmi < 18.5) {
+                    category = 'Underweight';
+                } else if (bmi < 25) {
+                    category = 'Normal weight';
+                } else if (bmi < 30) {
+                    category = 'Overweight';
+                } else {
+                    category = 'Obese';
+                }
+
+                resultDiv.innerHTML = `
+                    <p>Your BMI: <strong>${bmi.toFixed(1)}</strong></p>
+                    <p>Category: <strong>${category}</strong></p>
+                    <div style="margin-top: 10px;">
+                        <p>BMI Categories:</p>
+                        <ul style="text-align: left;">
+                            <li>Underweight: &lt; 18.5</li>
+                            <li>Normal weight: 18.5 - 24.9</li>
+                            <li>Overweight: 25 - 29.9</li>
+                            <li>Obese: 30 or greater</li>
+                        </ul>
+                    </div>
+                `;
+                resultDiv.style.display = 'block';
+            });
+        }
+
+        // Tool 20: Timer / Stopwatch
+        function getTimerStopwatchContent() {
+            return `
+                <div class="tool-section">
+                    <h3>Timer & Stopwatch</h3>
+                    <div style="text-align: center; margin-bottom: 1.5rem;">
+                        <div id="timeDisplay" style="font-size: 3rem; font-family: monospace; margin: 1rem 0;">00:00:00</div>
+                    </div>
+                    <div class="flex-row">
+                        <div>
+                            <h4>Stopwatch</h4>
+                            <button id="startStopwatchBtn">Start</button>
+                            <button id="stopStopwatchBtn">Stop</button>
+                            <button id="resetStopwatchBtn">Reset</button>
+                        </div>
+                        <div>
+                            <h4>Timer</h4>
+                            <div class="flex-row">
+                                <div>
+                                    <label for="timerHours">Hours:</label>
+                                    <input type="number" id="timerHours" value="0" min="0">
+                                </div>
+                                <div>
+                                    <label for="timerMinutes">Minutes:</label>
+                                    <input type="number" id="timerMinutes" value="1" min="0" max="59">
+                                </div>
+                                <div>
+                                    <label for="timerSeconds">Seconds:</label>
+                                    <input type="number" id="timerSeconds" value="0" min="0" max="59">
+                                </div>
+                            </div>
+                            <button id="startTimerBtn">Start Timer</button>
+                            <button id="stopTimerBtn">Stop Timer</button>
+                        </div>
+                    </div>
+                    <div id="timerAlert" style="display: none; text-align: center; margin-top: 1rem;">
+                        <p style="color: #FFD700; font-weight: bold;">Time's up!</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        function initTimerStopwatch() {
+            const timeDisplay = document.getElementById('timeDisplay');
+            const startStopwatchBtn = document.getElementById('startStopwatchBtn');
+            const stopStopwatchBtn = document.getElementById('stopStopwatchBtn');
+            const resetStopwatchBtn = document.getElementById('resetStopwatchBtn');
+            const timerHours = document.getElementById('timerHours');
+            const timerMinutes = document.getElementById('timerMinutes');
+            const timerSeconds = document.getElementById('timerSeconds');
+            const startTimerBtn = document.getElementById('startTimerBtn');
+            const stopTimerBtn = document.getElementById('stopTimerBtn');
+            const timerAlert = document.getElementById('timerAlert');
+
+            let stopwatchRunning = false;
+            let timerRunning = false;
+            let stopwatchStartTime = 0;
+            let stopwatchElapsed = 0;
+            let timerEndTime = 0;
+            let currentInterval = null;
+
+            function formatTime(ms) {
+                const hours = Math.floor(ms / 3600000);
+                const minutes = Math.floor((ms % 3600000) / 60000);
+                const seconds = Math.floor((ms % 60000) / 1000);
+                
+                return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
+
+            function updateDisplay() {
+                if (stopwatchRunning) {
+                    const currentTime = Date.now();
+                    const elapsed = currentTime - stopwatchStartTime + stopwatchElapsed;
+                    timeDisplay.textContent = formatTime(elapsed);
+                } else if (timerRunning) {
+                    const currentTime = Date.now();
+                    const remaining = Math.max(0, timerEndTime - currentTime);
+                    timeDisplay.textContent = formatTime(remaining);
+                    
+                    if (remaining === 0) {
+                        clearInterval(currentInterval);
+                        timerRunning = false;
+                        timerAlert.style.display = 'block';
+                        
+                        // Play alert sound if available
+                        try {
+                            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                            const oscillator = audioContext.createOscillator();
+                            const gainNode = audioContext.createGain();
+                            
+                            oscillator.connect(gainNode);
+                            gainNode.connect(audioContext.destination);
+                            
+                            oscillator.frequency.value = 800;
+                            oscillator.type = 'sine';
+                            
+                            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 1);
+                            
+                            oscillator.start(audioContext.currentTime);
+                            oscillator.stop(audioContext.currentTime + 1);
+                        } catch (e) {
+                            console.log('Audio context not supported');
+                        }
+                    }
+                }
+            }
+
+            // Stopwatch functions
+            startStopwatchBtn.addEventListener('click', function() {
+                if (!stopwatchRunning) {
+                    stopwatchRunning = true;
+                    stopwatchStartTime = Date.now();
+                    currentInterval = setInterval(updateDisplay, 100);
+                }
+            });
+
+            stopStopwatchBtn.addEventListener('click', function() {
+                if (stopwatchRunning) {
+                    stopwatchRunning = false;
+                    stopwatchElapsed += Date.now() - stopwatchStartTime;
+                    clearInterval(currentInterval);
+                }
+            });
+
+            resetStopwatchBtn.addEventListener('click', function() {
+                stopwatchRunning = false;
+                stopwatchElapsed = 0;
+                clearInterval(currentInterval);
+                timeDisplay.textContent = '00:00:00';
+            });
+
+            // Timer functions
+            startTimerBtn.addEventListener('click', function() {
+                if (!timerRunning) {
+                    const hours = parseInt(timerHours.value) || 0;
+                    const minutes = parseInt(timerMinutes.value) || 0;
+                    const seconds = parseInt(timerSeconds.value) || 0;
+                    
+                    const totalMs = (hours * 3600 + minutes * 60 + seconds) * 1000;
+                    
+                    if (totalMs <= 0) {
+                        alert('Please set a valid timer duration.');
+                        return;
+                    }
+                    
+                    timerRunning = true;
+                    timerEndTime = Date.now() + totalMs;
+                    timerAlert.style.display = 'none';
+                    currentInterval = setInterval(updateDisplay, 100);
+                }
+            });
+
+            stopTimerBtn.addEventListener('click', function() {
+                if (timerRunning) {
+                    timerRunning = false;
+                    clearInterval(currentInterval);
+                }
+            });
+        }
+
+        // Utility function to format file sizes
+        function formatBytes(bytes, decimals = 2) {
+            if (bytes === 0) return '0 Bytes';
+            
+            const k = 1024;
+            const dm = decimals < 0 ? 0 : decimals;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+            
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+        }
+    </script>
+</body>
+</html>
